@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:chatting_app/main.dart';
 import 'package:chatting_app/models/chatroom.dart';
@@ -42,6 +43,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           seen: false);
 
       FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userModel.uid)
+          .collection("chatrooms")
+          .doc(widget.chatroom.chatroomid)
+          .collection("message")
+          .doc(newMessage.messageid)
+          .set(newMessage.toMap());
+
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.targetuser.uid)
           .collection("chatrooms")
           .doc(widget.chatroom.chatroomid)
           .collection("message")
@@ -56,15 +68,55 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Row(
-        children: [
-          const CircleAvatar(),
-          const SizedBox(
-            width: 10,
+          backgroundColor: Colors.white,
+          bottomOpacity: 0.0,
+          elevation: 0.0,
+          leading: InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              CupertinoIcons.back,
+              color: Colors.black,
+            ),
           ),
-          Text(widget.targetuser.name.toString())
-        ],
-      )),
+          title: Row(
+            children: [
+              const CircleAvatar(),
+              const SizedBox(
+                width: 10,
+              ),
+              Column(
+                children: [
+                  Text(
+                    widget.targetuser.name.toString(),
+                    style: const TextStyle(
+                        fontFamily: "Overpass",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  const Text(
+                    "9:30 pm",
+                    style: TextStyle(
+                      fontFamily: "Overpass",
+                      fontSize: 14,
+                      color: Color(
+                        0xff606060,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(160, 0, 0, 0),
+                child: Icon(
+                  CupertinoIcons.ellipsis_vertical,
+                  color: Colors.black,
+                ),
+              )
+            ],
+          )),
       body: SafeArea(
           child: Column(
         children: [
@@ -79,7 +131,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           snapshot.data as QuerySnapshot;
                       return ListView.builder(
                           //reverse
-                          reverse: true,
+                          // reverse: true,
                           itemCount: dataSnapshot.docs.length,
                           itemBuilder: (context, index) {
                             MessageModel currentMessage = MessageModel.fromMap(
@@ -103,10 +155,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                                               BorderRadius.circular(5),
                                           color: (currentMessage.sender ==
                                                   widget.userModel.uid)
-                                              ? Colors.grey
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary),
+                                              ? const Color(
+                                                  0xff834df8,
+                                                )
+                                              : const Color(
+                                                  0xffd1bdf4,
+                                                )),
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
@@ -136,36 +190,69 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   }
                 },
                 stream: FirebaseFirestore.instance
+                    .collection("users")
+                    .doc(widget.userModel.uid)
                     .collection("chatrooms")
                     .doc(widget.chatroom.chatroomid)
                     .collection("message")
-                    .orderBy("createon", descending: true)
+                    .orderBy("createon", descending: false)
                     .snapshots()),
           )),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Container(
-              color: Colors.grey[200],
               child: Row(
                 children: [
+                  const Icon(
+                    CupertinoIcons.add_circled_solid,
+                    size: 40,
+                    color: Color(
+                      0xffd1bdf4,
+                    ),
+                  ),
                   Flexible(
                       child: Padding(
                     padding: const EdgeInsets.all(5.0),
-                    child: TextField(
-                      controller: messageController,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                          hintText: "Enter Message", border: InputBorder.none),
+                    child: SizedBox(
+                      height: 34,
+                      child: TextFormField(
+                        controller: messageController,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                            hintStyle: const TextStyle(
+                              fontSize: 16,
+                              color: Color(
+                                0xff8c8c8c,
+                              ),
+                            ),
+                            hintText: "Type Here.....",
+                            filled: true,
+                            fillColor: const Color(
+                              0xffd1bdf4,
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    const BorderSide(color: Colors.transparent),
+                                borderRadius: BorderRadius.circular(12)),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.transparent),
+                              borderRadius: BorderRadius.circular(12),
+                            )),
+                      ),
                     ),
                   )),
                   IconButton(
-                      onPressed: () {
-                        sendMessage();
-                      },
-                      icon: Icon(
-                        Icons.send,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ))
+                    onPressed: () {
+                      sendMessage();
+                    },
+                    icon: const Icon(
+                      CupertinoIcons.location_fill,
+                      color: Color(
+                        0xfffcbb64,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -6,6 +6,7 @@ import 'package:chatting_app/pages/login.dart';
 import 'package:chatting_app/pages/searchpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,14 +34,35 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
+          bottomOpacity: 0.0,
+          elevation: 0.0,
+          leading: InkWell(
+            onTap: () {},
+            child: const Icon(
+              CupertinoIcons.back,
+              color: Colors.black,
+            ),
+          ),
           centerTitle: true,
-          title: const Text("Chat App"),
+          title: const Text(
+            "Chats",
+            style: TextStyle(
+              fontSize: 24,
+              color: Color(
+                0xff9747ff,
+              ),
+            ),
+          ),
           actions: [
             IconButton(
                 onPressed: () {
                   logout();
                 },
-                icon: const Icon(Icons.exit_to_app)),
+                icon: const Icon(
+                  Icons.exit_to_app,
+                  color: Colors.black,
+                )),
           ],
         ),
         body: SafeArea(
@@ -116,6 +138,8 @@ class _HomePageState extends State<HomePage> {
                 }
               },
               stream: FirebaseFirestore.instance
+                  .collection("users")
+                  .doc(widget.userModel.uid)
                   .collection("chatrooms")
                   .where("participants.${widget.userModel.uid}",
                       isEqualTo: true)

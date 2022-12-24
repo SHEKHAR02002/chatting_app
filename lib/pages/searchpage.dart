@@ -27,6 +27,8 @@ class _SearchPageState extends State<SearchPage> {
   Future<ChatRoomModel?> getChatroomModel(UserModel targetUSer) async {
     ChatRoomModel? chatRoom;
     QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userModel.uid)
         .collection("chatrooms")
         .where("participants.${widget.userModel.uid}", isEqualTo: true)
         .where("participants.${targetUSer.uid}", isEqualTo: true)
@@ -50,9 +52,19 @@ class _SearchPageState extends State<SearchPage> {
             targetUSer.uid.toString(): true
           });
       await FirebaseFirestore.instance
+          .collection("users")
+          .doc(widget.userModel.uid)
           .collection("chatrooms")
           .doc(newChatroom.chatroomid)
           .set(newChatroom.toMap());
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(targetUSer.uid)
+          .collection("chatrooms")
+          .doc(newChatroom.chatroomid)
+          .set(newChatroom.toMap());
+
       chatRoom = newChatroom;
       log("new chatroom created");
     }
