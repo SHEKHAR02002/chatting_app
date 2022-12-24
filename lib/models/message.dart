@@ -3,7 +3,7 @@ class MessageModel {
   String? sender;
   String? text;
   bool? seen;
-  String? createon;
+  DateTime? createon;
 
   MessageModel(
       {this.messageid, this.sender, this.text, this.seen, this.createon});
@@ -13,7 +13,7 @@ class MessageModel {
     sender = map["sender"];
     text = map["text"];
     seen = map["seen"];
-    createon = map["createdon"];
+    createon = map["createon"].toDate();
   }
 
   Map<String, dynamic> toMap() {

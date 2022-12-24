@@ -44,85 +44,82 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: SafeArea(
-          child: Container(
-            child: StreamBuilder(
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active) {
-                    if (snapshot.hasData) {
-                      QuerySnapshot chatRoomSnapshot =
-                          snapshot.data as QuerySnapshot;
-                      return ListView.builder(
-                        itemCount: chatRoomSnapshot.docs.length,
-                        itemBuilder: ((context, index) {
-                          ChatRoomModel chatRoomModel = ChatRoomModel.fromMap(
-                              chatRoomSnapshot.docs[index].data()
-                                  as Map<String, dynamic>);
+          child: StreamBuilder(
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.active) {
+                  if (snapshot.hasData) {
+                    QuerySnapshot chatRoomSnapshot =
+                        snapshot.data as QuerySnapshot;
+                    return ListView.builder(
+                      itemCount: chatRoomSnapshot.docs.length,
+                      itemBuilder: ((context, index) {
+                        ChatRoomModel chatRoomModel = ChatRoomModel.fromMap(
+                            chatRoomSnapshot.docs[index].data()
+                                as Map<String, dynamic>);
 
-                          Map<String, dynamic> participants =
-                              chatRoomModel.participants!;
+                        Map<String, dynamic> participants =
+                            chatRoomModel.participants!;
 
-                          List<String> participantkeys =
-                              participants.keys.toList();
+                        List<String> participantkeys =
+                            participants.keys.toList();
 
-                          participantkeys.remove(widget.userModel.uid);
+                        participantkeys.remove(widget.userModel.uid);
 
-                          return FutureBuilder(
-                            future: FirebasHelper.getUserModelById(
-                                participantkeys[0]),
-                            builder: (context, userData) {
-                              if (userData.connectionState ==
-                                  ConnectionState.done) {
-                                if (userData.data != null) {
-                                  UserModel targetUser =
-                                      userData.data as UserModel;
-
-                                  return ListTile(
-                                      onTap: () {
-                                        Navigator.push(context,
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return ChatRoomPage(
-                                            chatroom: chatRoomModel,
-                                            firebaseUser: widget.firebaseUser,
-                                            userModel: widget.userModel,
-                                            targetuser: targetUser,
-                                          );
-                                        }));
-                                      },
-                                      leading: const CircleAvatar(),
-                                      title: Text(targetUser.name.toString()),
-                                      subtitle: Text(
-                                        chatRoomModel.lastMessage.toString(),
-                                      ));
-                                } else {
-                                  return Container();
-                                }
+                        return FutureBuilder(
+                          future: FirebasHelper.getUserModelById(
+                              participantkeys[0]),
+                          builder: (context, userData) {
+                            if (userData.connectionState ==
+                                ConnectionState.done) {
+                              if (userData.data != null) {
+                                UserModel targetUser =
+                                    userData.data as UserModel;
+                                //made list Tile
+                                return ListTile(
+                                    onTap: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute(builder: (context) {
+                                        return ChatRoomPage(
+                                          chatroom: chatRoomModel,
+                                          firebaseUser: widget.firebaseUser,
+                                          userModel: widget.userModel,
+                                          targetuser: targetUser,
+                                        );
+                                      }));
+                                    },
+                                    leading: const CircleAvatar(),
+                                    title: Text(targetUser.name.toString()),
+                                    subtitle: Text(
+                                      chatRoomModel.lastMessage.toString(),
+                                    ));
                               } else {
                                 return Container();
                               }
-                            },
-                          );
-                        }),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(snapshot.error.toString()),
-                      );
-                    } else {
-                      return const Center(
-                        child: Text("no Chats"),
-                      );
-                    }
+                            } else {
+                              return Container();
+                            }
+                          },
+                        );
+                      }),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
                   } else {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: Text("no Chats"),
+                    );
                   }
-                },
-                stream: FirebaseFirestore.instance
-                    .collection("chatrooms")
-                    .where("participants.${widget.userModel.uid}",
-                        isEqualTo: true)
-                    .snapshots()),
-          ),
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+              stream: FirebaseFirestore.instance
+                  .collection("chatrooms")
+                  .where("participants.${widget.userModel.uid}",
+                      isEqualTo: true)
+                  .snapshots()),
           // CupertinoButton(
           //     color: Theme.of(context).colorScheme.secondary,
           //     onPressed: () {
